@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0>
+    <style> 
+      body {padding: 0; margin: 0;}
+    </style>
+    <script src="./p5/p5.min.js"></script>
+    <script src="./p5/addons/p5.dom.min.js"></script>
+    <script src="./p5/addons/p5.sound.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+    <script src="card.js"></script>
+    <script src="stack.js"></script>
+    <script src="sketch.js"></script>
+  </head>
+  
+  <body>
+    <h1 align="center">CodeNames</h1>
+    <div id="sketch-holder" align="center">
+      <!-- sketch will go here -->
+    </div>
+    <div id="controls" align="center">
+        <button name = "button" value = "clicked" onclick="submit()">Click me</button>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,4 @@
+/public/p5/**
+*.json
+/node_modules/**
+.DS_Store

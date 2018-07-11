@@ -22,6 +22,7 @@ class RoomList {
 class Room {
     constructor (roomName, cards) {
         this.name = roomName;
+        this.mode = "lobby";
         this.cards = cards;
         this.gameStarted = false;
     }
@@ -118,6 +119,10 @@ io.on('connection', function(socket) {
             console.log(socket.player.playerId + " joining room: " + socket.player.room);
             socket.join(socket.player.room);
         }
+    });
+    socket.on('modeUpdate', function(roomName, mode) {
+        roomList.rooms[roomName].mode = mode;
+        console.log("change mode to: " + roomList.rooms[roomName].mode);
     });
     socket.on('cardUpdate', function(data) {
         var room = String(data.room);

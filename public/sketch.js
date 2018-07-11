@@ -7,15 +7,20 @@ var Game = {
   winner: null
 };
 
+function changeMode(mode) {
+  Game.mode = mode;
+  socket.emit('modeUpdate', Game.room, Game.mode);
+}
+
 Client.socket.on('win', function(data) {
-  Game.mode = "win";
+  changeMode("win");
   Game.winner = data;
 });
 
 Client.socket.on('createCards', function(data) {
   for (var i = 0; i < data.length; i++) {
     background(100);
-    Game.mode = "game";
+    changeMode("game");
     document.getElementById("readyBtn").style.display = "none";
     Game.cards.push(new Card(data[i].x, data[i].y, data[i].word, data[i].isRed, data[i].isBlue, data[i].col, data[i].textCol, data[i].isFlipped));
   }

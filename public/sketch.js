@@ -1,35 +1,41 @@
 //variables to start with
-var Game = {
-  room: Client.room,
-  turnNumber: 1,
-  cards: [],
-  mode: "lobby",
-  winner: null
-};
+
+class Game {
+  constructor () {
+    this.room = Client.room;
+    this.turnNumber = 1,
+    this.cards = [],
+    this.mode = "lobby";
+    this.winner = null;
+  }
+}
+
+var game = new Game();
 
 function changeMode(mode) {
-  Game.mode = mode;
-  socket.emit('modeUpdate', Game.room, Game.mode);
+  game.mode = mode;
+  Client.socket.emit('modeUpdate', game.room, game.mode);
 }
 
 Client.socket.on('win', function(data) {
   changeMode("win");
-  Game.winner = data;
+  game.winner = data;
 });
 
-Client.socket.on('createCards', function(data) {
+Client.socket.on('createCards', function(data, mode, winner) {
+  game.mode = mode;
+  game.winner = winner;
   for (var i = 0; i < data.length; i++) {
     background(100);
-    changeMode("game");
     document.getElementById("readyBtn").style.display = "none";
-    Game.cards.push(new Card(data[i].x, data[i].y, data[i].word, data[i].isRed, data[i].isBlue, data[i].col, data[i].textCol, data[i].isFlipped));
+    game.cards.push(new Card(data[i].x, data[i].y, data[i].word, data[i].isRed, data[i].isBlue, data[i].col, data[i].textCol, data[i].isFlipped));
   }
 });
 
 Client.socket.on('cardUpdate', function(data) {
-  Game.cards[data.index].col = data.col;
-  Game.cards[data.index].textCol = data.textCol;
-  Game.cards[data.index].isFlipped = data.isFlipped;
+  game.cards[data.index].col = data.col;
+  game.cards[data.index].textCol = data.textCol;
+  game.cards[data.index].isFlipped = data.isFlipped;
 });
 
 //variables for fireworks
@@ -49,18 +55,18 @@ function setup() {
 
 //function to draw the cards
 function draw() {
-  if (Game.mode === "lobby") {
+  if (game.mode === "lobby") {
     fill(255, 255, 255);
     textSize(40);
     textAlign(CENTER);
     text("Waiting for players to ready up...", 150, 200, 500, 100);
   }
-  else if (Game.mode === "game") {
-    for (var i = 0; i < Game.cards.length; i++) {
-      Game.cards[i].display();
+  else if (game.mode === "game") {
+    for (var i = 0; i < game.cards.length; i++) {
+      game.cards[i].display();
     }
   }
-  else if (Game.mode === "win") {
+  else if (game.mode === "win") {
     background(0);
     firework.applyForce(gravity);
     firework.update();
@@ -77,21 +83,21 @@ function draw() {
     fill(255, 255, 255);
     textSize(40);
     textAlign(CENTER);
-    text(Game.winner + " team won!", 150, 200, 500, 100);
+    text(game.winner + " team won!", 150, 200, 500, 100);
     fill(105, 117, 119, 5);
     rect(245, 200, 300, 100);
   }
   else {
-    console.log("unrecognized game mode");
+    console.log("unrecognized game mode" + game.mode);
   }
 }
 
 function checkWin(teamColor) {
 
   if (teamColor === "red") {
-    for (var i = 0; i < Game.cards.length; i++) {
-      if (Game.cards[i].isRed) {
-        if (!Game.cards[i].isFlipped) {
+    for (var i = 0; i < game.cards.length; i++) {
+      if (game.cards[i].isRed) {
+        if (!game.cards[i].isFlipped) {
           return false;
         }
       }
@@ -100,9 +106,9 @@ function checkWin(teamColor) {
     return true;
   }
   else {
-    for (var i = 0; i < Game.cards.length; i++) {
-      if (Game.cards[i].isBlue) {
-        if (!Game.cards[i].isFlipped) {
+    for (var i = 0; i < game.cards.length; i++) {
+      if (game.cards[i].isBlue) {
+        if (!game.cards[i].isFlipped) {
           return false;
         }
       }
@@ -115,26 +121,26 @@ function checkWin(teamColor) {
 //function to check whether the cards were clicked when the mous was pressed
 function mousePressed() {
 
-  for (var i = 0; i < Game.cards.length; i++) {
-    if (Game.cards[i].click(mouseX, mouseY)) {
+  for (var i = 0; i < game.cards.length; i++) {
+    if (game.cards[i].click(mouseX, mouseY)) {
 
       var cardData = {
         room: Client.room,
         index: i,
-        col: Game.cards[i].col,
-        textCol: Game.cards[i].textCol,
-        isFlipped: Game.cards[i].isFlipped
+        col: game.cards[i].col,
+        textCol: game.cards[i].textCol,
+        isFlipped: game.cards[i].isFlipped
       };
 
       console.log(cardData);
   
       Client.socket.emit('cardUpdate', cardData);
 
-      if (checkWin("red") && Game.mode != "win") {
+      if (checkWin("red") && game.mode != "win") {
         Client.socket.emit('win', "red", Client.room);
       }
 
-      if (checkWin("blue") && Game.mode != "win") {
+      if (checkWin("blue") && game.mode != "win") {
         Client.socket.emit('win', "blue", Client.room);
       }
     }
@@ -144,8 +150,9 @@ function mousePressed() {
 //submitfunction, changes to next turn
 function submit() {
   console.log("button clicked!");
-  console.log(Game.room);
-  Client.socket.emit('startGame', Game.room);
+  console.log(game.room);
+  changeMode("game");
+  Client.socket.emit('startGame', game.room);
 }
 
 

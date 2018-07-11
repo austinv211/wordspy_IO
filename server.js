@@ -25,6 +25,7 @@ class Room {
         this.mode = "lobby";
         this.cards = cards;
         this.gameStarted = false;
+        this.winner = null;
     }
 }
 
@@ -110,7 +111,7 @@ io.on('connection', function(socket) {
             socket.join(socket.player.room);
             
             if (roomList.rooms[roomName].gameStarted) {
-                socket.emit('createCards', roomList.rooms[roomName].cards);
+                socket.emit('createCards', roomList.rooms[roomName].cards, roomList.rooms[roomName].mode, roomList.rooms[roomName].winner);
             }
         }
         else {
@@ -143,11 +144,14 @@ io.on('connection', function(socket) {
     socket.on('startGame', function(data) {
         var roomName = String(data);
         console.log(roomName);
-        io.in(roomName).emit('createCards', roomList.rooms[roomName].cards);
+        roomList.rooms[roomName].mode = "game";
+        io.in(roomName).emit('createCards', roomList.rooms[roomName].cards, roomList.rooms[roomName].mode, roomList.rooms[roomName].winner);
         roomList.rooms[roomName].gameStarted = true;
     });
 
     socket.on('win', function(color, room) {
+        roomList.rooms[room].mode = "win";
+        roomList.rooms[room].winner = color;
         io.in(room).emit('win', color);
     });
 });

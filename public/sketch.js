@@ -17,6 +17,21 @@ function changeMode(mode) {
   Client.socket.emit('modeUpdate', game.room, game.mode);
 }
 
+Client.socket.on('getPlayers', function(clients) {
+  console.log("players in room");
+  for (var i = 0; i < clients.length; i++) {
+    console.log(clients[i]);
+    var userList = document.getElementById("userList");
+
+    if (document.getElementById("listItem" + i) === null) {
+      var li = document.createElement("li");
+      li.appendChild(document.createTextNode(clients[i]));
+      li.setAttribute("id", "listItem" + i);
+      userList.appendChild(li);
+    }
+  }
+});
+
 Client.socket.on('newGame', function() {
   console.log("newGame");
   background(100);

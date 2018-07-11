@@ -26,6 +26,11 @@ class Room {
         this.cards = cards;
         this.gameStarted = false;
         this.winner = null;
+        this.players = [];
+    }
+
+    addPlayer(playerID) {
+        this.players.push(playerID);
     }
 }
 
@@ -108,6 +113,7 @@ io.on('connection', function(socket) {
         if (roomList.rooms[roomName]) {
             console.log(roomName + " already created");
             console.log(socket.player.playerId + " joining room: " + socket.player.room);
+            roomList.rooms[roomName].addPlayer(socket.player.playerId);
             socket.join(socket.player.room);
             
             if (roomList.rooms[roomName].gameStarted) {
@@ -118,6 +124,7 @@ io.on('connection', function(socket) {
             roomList.addRoom(roomName, createCardsServer());
 
             console.log(socket.player.playerId + " joining room: " + socket.player.room);
+            roomList.rooms[roomName].addPlayer(socket.player.playerId);
             socket.join(socket.player.room);        
         }
     });
@@ -160,6 +167,13 @@ io.on('connection', function(socket) {
         delete roomList.rooms[room];
         roomList.addRoom(room, createCardsServer());
         io.in(room).emit('newGame');
+    });
+
+    socket.on('getPlayers', function(room){
+        console.log("sending players");
+        console.log("number of players " + roomList.rooms[room].players.length);
+
+        io.in(room).emit('getPlayers', roomList.rooms[room].players);
     });
 });
 

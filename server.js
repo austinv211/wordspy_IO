@@ -118,7 +118,7 @@ io.on('connection', function(socket) {
             roomList.addRoom(roomName, createCardsServer());
 
             console.log(socket.player.playerId + " joining room: " + socket.player.room);
-            socket.join(socket.player.room);
+            socket.join(socket.player.room);        
         }
     });
     socket.on('modeUpdate', function(roomName, mode) {
@@ -153,6 +153,12 @@ io.on('connection', function(socket) {
         roomList.rooms[room].mode = "win";
         roomList.rooms[room].winner = color;
         io.in(room).emit('win', color);
+    });
+
+    socket.on('newGame', function(room) {
+        delete roomList.rooms[room];
+        roomList.addRoom(room, createCardsServer());
+        io.in(room).emit('newGame');
     });
 });
 

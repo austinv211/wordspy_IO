@@ -17,6 +17,17 @@ function changeMode(mode) {
   Client.socket.emit('modeUpdate', game.room, game.mode);
 }
 
+Client.socket.on('newGame', function() {
+  console.log("newGame");
+  background(100);
+  document.getElementById("readyBtn").style.display = "block"
+  game.mode = "lobby"
+  game.cards = [];
+  game.winner = null;
+  game.room = Client.room;
+  game.turnNumber = 1;
+});
+
 Client.socket.on('win', function(data) {
   changeMode("win");
   game.winner = data;
@@ -153,6 +164,11 @@ function submit() {
   console.log(game.room);
   changeMode("game");
   Client.socket.emit('startGame', game.room);
+}
+
+function newGame() {
+  console.log("new game requested");
+  Client.socket.emit('newGame', game.room);
 }
 
 

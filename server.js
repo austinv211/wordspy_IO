@@ -145,6 +145,7 @@ io.on('connection', function(socket) {
         var roomName = String(data);
         console.log(roomName);
         roomList.rooms[roomName].mode = "game";
+        roomList.rooms[roomName].gameStarted = true;
         io.in(roomName).emit('createCards', roomList.rooms[roomName].cards, roomList.rooms[roomName].mode, roomList.rooms[roomName].winner);
         roomList.rooms[roomName].gameStarted = true;
     });

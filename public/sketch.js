@@ -20,7 +20,8 @@ function changeMode(mode) {
 Client.socket.on('newGame', function() {
   console.log("newGame");
   background(100);
-  document.getElementById("readyBtn").style.display = "block"
+  document.getElementById("readyBtn").style.display = "inline-block"
+  document.getElementById("newGame").style.display = "none";
   game.mode = "lobby"
   game.cards = [];
   game.winner = null;
@@ -31,6 +32,7 @@ Client.socket.on('newGame', function() {
 Client.socket.on('win', function(data) {
   changeMode("win");
   game.winner = data;
+  document.getElementById("newGame").style.display = "inline-block";
 });
 
 Client.socket.on('createCards', function(data, mode, winner) {

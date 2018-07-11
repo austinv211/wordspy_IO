@@ -53,10 +53,10 @@ class Card {
         // stroke(0);
         noStroke();
         fill(this.col);
-        rect(this.x, this.y, this.size, this.size, 10, 10, 10, 10);
+        rect(this.x, this.y, 120, 100, 5, 5, 5, 5);
         fill(this.textCol);
-        textSize(20);
+        textSize(18);
         textAlign(CENTER, CENTER);
-        text(this.word, this.x, this.y, this.size, this.size);
+        text(this.word, this.x, this.y, 120, 100);
     }
 }

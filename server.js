@@ -3,6 +3,9 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var fs = require('fs');
+var nouns = fs.readFileSync('nounlist.txt').toString().split("\n");
+
 
 var lastPlayerID = 0;
 
@@ -20,6 +23,7 @@ class Room {
     constructor (roomName, cards) {
         this.name = roomName;
         this.cards = cards;
+        this.gameStarted = false;
     }
 }
 
@@ -54,7 +58,7 @@ function createCardsServer() {
     //create the number of cards and space them accordingly
     for (var i = 0; i < 4; i++) {
       for (var j = 0; j < 5; j++) {
-        var c = new CardServer(j * 150 + 45, 115 * i + 25, "test", false, false, [255, 100], [0, 0, 0], false);
+        var c = new CardServer(j * 150 + 45, 115 * i + 45,nouns[Math.floor(Math.random() * nouns.length - 1)] , false, false, [255, 100], [0, 0, 0], false);
         cards.push(c);
       }
     }
@@ -103,15 +107,16 @@ io.on('connection', function(socket) {
             console.log(roomName + " already created");
             console.log(socket.player.playerId + " joining room: " + socket.player.room);
             socket.join(socket.player.room);
-            socket.emit('createCards', roomList.rooms[roomName].cards);
+            
+            if (roomList.rooms[roomName].gameStarted) {
+                socket.emit('createCards', roomList.rooms[roomName].cards);
+            }
         }
         else {
             roomList.addRoom(roomName, createCardsServer());
 
             console.log(socket.player.playerId + " joining room: " + socket.player.room);
             socket.join(socket.player.room);
-
-            socket.emit('createCards', roomList.rooms[roomName].cards);
         }
     });
     socket.on('cardUpdate', function(data) {
@@ -129,6 +134,16 @@ io.on('connection', function(socket) {
         };
 
         io.in(room).emit('cardUpdate', cardData);
+    });
+    socket.on('startGame', function(data) {
+        var roomName = String(data);
+        console.log(roomName);
+        io.in(roomName).emit('createCards', roomList.rooms[roomName].cards);
+        roomList.rooms[roomName].gameStarted = true;
+    });
+
+    socket.on('win', function(color, room) {
+        io.in(room).emit('win', color);
     });
 });
 

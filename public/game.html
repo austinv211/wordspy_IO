@@ -5,24 +5,144 @@
     <meta name="viewport" width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0>
     <style> 
       body {padding: 0; margin: 0;}
+      .sidenav {
+          height: 100%;
+          width: 250px;
+          position: fixed;
+          z-index: 1;
+          top: 0;
+          left: 0;
+          background-color: rgb(69, 68, 77);
+          overflow-x: hidden;
+          transition: 0.5s;
+          padding-top: 60px;
+      }
+
+      .sidenav a {
+          padding: 8px 8px 8px 32px;
+          text-decoration: none;
+          font-size: 25px;
+          color: #ece8e8;
+          display: block;
+          transition: 0.3s;
+      }
+
+      .sidenav h2 {
+        padding: 8px 8px 8px 32px;
+          text-decoration: none;
+          font-size: 25px;
+          color: #ece8e8;
+          display: block;
+          transition: 0.3s;
+      }
+
+      .sidenav button {
+        background-color: rgb(8, 141, 13); /* Green */
+        border: none;
+        color: white;
+        padding: 14px 40px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+      }
+
+      .sidenav .closebtn {
+        position: absolute;
+        top: 0;
+        right: 25px;
+        font-size: 36px;
+        margin-left: 50px;
+      }
+
+      .sidenav button:hover {
+        background-color: #4CAF50;
+        color: white;
+      }
+
+      #sketch-holder {
+        position: relative;
+        transition: padding-left 0.5s;
+        padding-top: 120px;
+      }
+      #header {
+        position: relative;
+        transition: padding-left 0.5s;
+      }
+
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <script src="./p5/p5.min.js"></script>
     <script src="./p5/addons/p5.dom.min.js"></script>
     <script src="./p5/addons/p5.sound.min.js"></script>
+    <script src="./p5/addons/p5.dom.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="client.js"></script>
     <script src="card.js"></script>
+    <script src='partical.js'></script>
     <script src="stack.js"></script>
     <script src="sketch.js"></script>
+    <script>
+
+      var userClosed = false;
+
+      function openNav() {
+        if (userClosed) {
+          //dont open nav bar
+        }
+        else {
+          document.getElementById("header").style.paddingLeft = "250px";
+          document.getElementById("mySidenav").style.width = "250px";
+          document.getElementById("sketch-holder").style.paddingLeft = "250px";
+        }
+      }
+        
+      function closeNav() {
+        document.getElementById("header").style.paddingLeft = "0px";
+        document.getElementById("mySidenav").style.width = "0";
+        document.getElementById("sketch-holder").style.paddingLeft = "0";
+      }
+
+      function userCloseNav() {
+        userClosed = true;
+        closeNav();
+      }
+
+      function userOpenNav() {
+        userClosed = false;
+        openNav();
+      }
+
+      jQuery(document).ready(function(){
+        if (jQuery(window).width() < 900) {
+          closeNav();
+        }
+        else {
+          openNav();
+        }  
+      });
+      jQuery(window).resize(function () {
+        if (jQuery(window).width() < 900) {
+          closeNav();
+        }
+        else {
+          openNav();
+        }
+      });
+    </script>
   </head>
-  
   <body>
-    <h1 align="center">CodeNames</h1>
-    <div id="sketch-holder" align="center">
-      <!-- sketch will go here -->
+    <span style="font-size:30px;cursor:pointer" onclick="userOpenNav()">&#9776;</span>
+    <h1 id="header" align="center">WORDSPY.IO</h1>
+    <div id="mySidenav" class="sidenav">
+      <a href="javascript:void(0)" class="closebtn" onclick="userCloseNav()">&times;</a>
+      <h2>Users</h2>
+      <button id="readyBtn" name = "button" value = "clicked" onclick="submit()">Ready</button>
     </div>
-    <div id="controls" align="center">
-        <button name = "button" value = "clicked" onclick="submit()">Click me</button>
+    <div id="sketch-holder" class="block" align="center">
+      <!-- sketch will go here -->
     </div>
   </body>
 </html>

@@ -9,4 +9,3 @@ Client.askNewPlayer = function() {
 }
 
 Client.askNewPlayer();
-

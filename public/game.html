@@ -62,14 +62,41 @@
         color: white;
       }
 
-      #sketch-holder {
+      #sketchContainer {
         position: relative;
         transition: padding-left 0.5s;
+      }
+
+      .bottomSketch {
+        position: relative;
+        padding-left: 600px;
+      }
+      
+      #sketch-holder {
+        position: relative;
         padding-top: 120px;
       }
       #header {
         position: relative;
         transition: padding-left 0.5s;
+      }
+
+      #newGame {
+        background-color: rgb(8, 141, 13); /* Green */
+        border: none;
+        color: white;
+        padding: 14px 40px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+      }
+
+      #newGame:hover {
+        background-color: #4CAF50;
+        color: white;
       }
 
     </style>
@@ -95,14 +122,14 @@
         else {
           document.getElementById("header").style.paddingLeft = "250px";
           document.getElementById("mySidenav").style.width = "250px";
-          document.getElementById("sketch-holder").style.paddingLeft = "250px";
+          document.getElementById("sketchContainer").style.paddingLeft = "250px";
         }
       }
         
       function closeNav() {
         document.getElementById("header").style.paddingLeft = "0px";
         document.getElementById("mySidenav").style.width = "0";
-        document.getElementById("sketch-holder").style.paddingLeft = "0";
+        document.getElementById("sketchContainer").style.paddingLeft = "0";
       }
 
       function userCloseNav() {
@@ -141,8 +168,13 @@
       <h2>Users</h2>
       <button id="readyBtn" name = "button" value = "clicked" onclick="submit()">Ready</button>
     </div>
-    <div id="sketch-holder" class="block" align="center">
-      <!-- sketch will go here -->
+    <div id="sketchContainer" class="sketchContainer" align="center">
+      <div id="sketch-holder" class="block" align="center">
+        <!-- sketch will go here -->
+      </div>
+      <div id="bottomSketch" class="bottomSketch" align="center">
+        <button id="newGame" name="button1" class= "button" value = "clicked" onclick="newGame()">newGame</button>
+      </div>
     </div>
   </body>
 </html>

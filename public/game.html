@@ -27,10 +27,19 @@
           transition: 0.3s;
       }
 
-      .sidenav ul {
-        padding: 8px 8px 8px 32px;
+      .sidenav h2 {
+          padding: 8px 8px 8px 32px;
           text-decoration: none;
           font-size: 25px;
+          color: #ece8e8;
+          display: block;
+          transition: 0.3s;
+      }
+
+      .sidenav ul {
+          padding: 8px 8px 8px 32px;
+          text-decoration: none;
+          font-size: 15px;
           color: #ece8e8;
           display: block;
           transition: 0.3s;
@@ -66,6 +75,10 @@
         position: relative;
         transition: padding-left 0.5s;
       }
+    
+      .topSketch {
+        padding-left:500px;
+      }
 
       .bottomSketch {
         position: relative;
@@ -74,11 +87,27 @@
       
       #sketch-holder {
         position: relative;
-        padding-top: 120px;
       }
       #header {
         position: relative;
         transition: padding-left 0.5s;
+      }
+
+      #nextTurn {
+        background-color: rgb(8, 141, 13); /* Green */
+        border: none;
+        color: white;
+        padding: 14px 40px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+      }
+      #nextTurn:hover {
+        background-color: #4CAF50;
+        color: white;
       }
 
       #newGame {
@@ -165,15 +194,19 @@
     <h1 id="header" align="center">WORDSPY.IO</h1>
     <div id="mySidenav" class="sidenav">
       <a href="javascript:void(0)" class="closebtn" onclick="userCloseNav()">&times;</a>
-      <ul id="userList">Users</ul>
+      <h2 id="userHeader">Users</h2>
+      <ul id="userList"></ul>
       <button id="readyBtn" name = "button" value = "clicked" onclick="submit()">Ready</button>
     </div>
     <div id="sketchContainer" class="sketchContainer" align="center">
+      <div id="topSketch" class="topSketch" align="center">
+        <button id="nextTurn" name="button2" class= "nextTurnButton" value = "nextTurn" onclick="nextTurn()">nextTurn</button>
+      </div>
       <div id="sketch-holder" class="block" align="center">
         <!-- sketch will go here -->
       </div>
       <div id="bottomSketch" class="bottomSketch" align="center">
-        <button id="newGame" name="button1" class= "newGameButton" value = "clicked" onclick="newGame()">newGame</button>
+        <button id="newGame" name="button1" class= "newGameButton" value = "newGame" onclick="newGame()">newGame</button>
       </div>
     </div>
   </body>

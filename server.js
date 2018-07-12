@@ -1,25 +1,32 @@
 //variables needed to host site and sockets
+//save express and set up app to equal function call
 var express = require('express');
 var app = express();
+//set up http
 var http = require('http').Server(app);
+//set up socket.io
 var io = require('socket.io')(http);
+//set up filesystem
 var fs = require('fs');
+//read the text file of nouns into an arrau
 var nouns = fs.readFileSync('nounlist.txt').toString().split("\n");
 
-
-var lastPlayerID = 0;
-
+//class for a list of rooms
 class RoomList {
+    //no-arg constructor
     constructor () {
         this.rooms = new Object();
     }
 
+    //function to add a room
     addRoom(roomName, cards) {
         this.rooms[roomName] = new Room(roomName, cards);
     }
 }
 
+//class for a room
 class Room {
+    //costructor takes the name of the room and an array of cards
     constructor (roomName, cards) {
         this.name = roomName;
         this.mode = "lobby";
@@ -29,11 +36,13 @@ class Room {
         this.players = [];
     }
 
-    addPlayer(playerID) {
-        this.players.push(playerID);
+    //function to add a player to the room
+    addPlayer(player) {
+        this.players.push(player);
     }
 }
 
+//create instance of roomlist
 var roomList = new RoomList();
 
 
@@ -70,10 +79,12 @@ function createCardsServer() {
       }
     }
   
+    //create sequence of card numbers and then shuffle them
     var cardNumbers = Array.from(new Array(numberOfCards), (x, i) => i);
     cardNumbers = shuffle(cardNumbers);
   
   
+    //randomlt assign red and blue cards
     for (var i = 0; i < numberOfCards; i++) {
       var r = cardNumbers[i];
   
@@ -84,6 +95,7 @@ function createCardsServer() {
         cards[r].isRed = true;
       }
     }
+
     //return the array of cards
     return cards;
 }
@@ -104,35 +116,49 @@ io.on('connection', function(socket) {
     socket.on('disconnect', function() {
         console.log("ID disconnected: " + socket.id);
     });
-    socket.on('newPlayer', function(roomName) {
+    //on newPlayer, if the room is already created, add the player and send them room data, else create new room data
+    socket.on('newPlayer', function(playerName, roomName) {
         socket.player = {
-            room: roomName,
-            playerId: lastPlayerID++,
+            name: playerName,
+            playerId: socket.id
         };
 
         if (roomList.rooms[roomName]) {
+            //log already created
             console.log(roomName + " already created");
-            console.log(socket.player.playerId + " joining room: " + socket.player.room);
-            roomList.rooms[roomName].addPlayer(socket.player.playerId);
-            socket.join(socket.player.room);
+            console.log(socket.player.playerId + " joining room: " + roomName);
             
+            //add the player to the room
+            roomList.rooms[roomName].addPlayer(socket.player);
+            socket.join(roomName);
+            
+            //if the game is started send them the cards
             if (roomList.rooms[roomName].gameStarted) {
                 socket.emit('createCards', roomList.rooms[roomName].cards, roomList.rooms[roomName].mode, roomList.rooms[roomName].winner);
             }
         }
+        //if room is not created, create new room data
         else {
+            //add the new room
             roomList.addRoom(roomName, createCardsServer());
 
+            //log joining
             console.log(socket.player.playerId + " joining room: " + socket.player.room);
-            roomList.rooms[roomName].addPlayer(socket.player.playerId);
-            socket.join(socket.player.room);        
+
+            //add the player to the room
+            roomList.rooms[roomName].addPlayer(socket.player);
+            socket.join(roomName);        
         }
     });
+    //function to handle what happens when modeupdate is sent
     socket.on('modeUpdate', function(roomName, mode) {
+        //update room data mode
         roomList.rooms[roomName].mode = mode;
         console.log("change mode to: " + roomList.rooms[roomName].mode);
     });
+    //function to handle what happens when card update is sent
     socket.on('cardUpdate', function(data) {
+        //save the room and update the card for that room
         var room = String(data.room);
         var card = roomList.rooms[room].cards[data.index];
         card.col = data.col;
@@ -146,38 +172,60 @@ io.on('connection', function(socket) {
             index: data.index
         };
 
+        //emit the new card data to everyone in the room
         io.in(room).emit('cardUpdate', cardData);
     });
+    //function to handle what to do when a start game is asked for
     socket.on('startGame', function(data) {
+        //save the room name
         var roomName = String(data);
         console.log(roomName);
+        //change the mode and gameStarted values
         roomList.rooms[roomName].mode = "game";
         roomList.rooms[roomName].gameStarted = true;
+
+        //emit the change to everyone in the room to be able to start the game
         io.in(roomName).emit('createCards', roomList.rooms[roomName].cards, roomList.rooms[roomName].mode, roomList.rooms[roomName].winner);
         roomList.rooms[roomName].gameStarted = true;
     });
 
+    //what to do when a win condtiion is asked ofr
     socket.on('win', function(color, room) {
+        //set the mode for the room to win
         roomList.rooms[room].mode = "win";
+        //save the winner color
         roomList.rooms[room].winner = color;
+        //emit the data to everyone in the room
         io.in(room).emit('win', color);
     });
 
+    //function to handle what to do when new game is called
     socket.on('newGame', function(room) {
+        //delete the room data
         delete roomList.rooms[room];
+
+        //create new room data
         roomList.addRoom(room, createCardsServer());
+
+        //emit the new room to everyone in the room
         io.in(room).emit('newGame');
     });
+    //function to handle what to do when next turn is called
+    socket.on('nextTurn', function(room) {
+        io.in(room).emit('nextTurn');
+    });
 
+    //function on what to do when getplayers is asked for
     socket.on('getPlayers', function(room){
         console.log("sending players");
         console.log("number of players " + roomList.rooms[room].players.length);
 
+        //send the players to everyone in the room
         io.in(room).emit('getPlayers', roomList.rooms[room].players);
     });
 });
 
-
+//listen on port 3000 via http
 http.listen(3000,'0.0.0.0', function() {
     console.log("listening on 3000");
 });

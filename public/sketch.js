@@ -7,6 +7,11 @@ class Game {
     this.cards = [],
     this.mode = "lobby";
     this.winner = null;
+    this.players = new Object();
+  }
+
+  addPlayer(name, team) {
+    this.players[name] = team;
   }
 }
 
@@ -17,6 +22,21 @@ function changeMode(mode) {
   Client.socket.emit('modeUpdate', game.room, game.mode);
 }
 
+Client.socket.on('nextTurn', function() {
+  console.log("increasing turn");
+  game.turnNumber++;
+  console.log(game.turnNumber);
+  console.log(document.getElementById("nextTurn").value)
+  if (game.turnNumber % 2 == 0 ) {
+    document.getElementById("nextTurn").textContent = "end red's turn";
+    document.getElementById("nextTurn").style.backgroundColor = "#FF4447";
+  }
+  else {
+    document.getElementById("nextTurn").textContent = "end blue's turn";
+    document.getElementById("nextTurn").style.backgroundColor = "#5CCFF2";
+  }
+});
+
 Client.socket.on('getPlayers', function(clients) {
   console.log("players in room");
   for (var i = 0; i < clients.length; i++) {
@@ -25,11 +45,23 @@ Client.socket.on('getPlayers', function(clients) {
 
     if (document.getElementById("listItem" + i) === null) {
       var li = document.createElement("li");
-      li.appendChild(document.createTextNode(clients[i]));
+      var team;
+      if ((i + 1) % 2 == 0) {
+        team = "blue";
+      }
+      else {
+        team = "red";
+      }
+
+      li.appendChild(document.createTextNode(clients[i].name + " team: " + team));
       li.setAttribute("id", "listItem" + i);
       userList.appendChild(li);
+
+      game.addPlayer(clients[i].name, team);
+      console.log(game.players);
     }
   }
+  Client.setTeam(game.players[Client.playerName]);
 });
 
 Client.socket.on('newGame', function() {
@@ -186,6 +218,10 @@ function submit() {
 function newGame() {
   console.log("new game requested");
   Client.socket.emit('newGame', game.room);
+}
+
+function nextTurn() {
+  Client.socket.emit('nextTurn', game.room);
 }
 
 

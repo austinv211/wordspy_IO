@@ -2,12 +2,45 @@
 <html>
     <head>
         <title>Welcome!</title>
-        <script src='getroom.js'></script> 
+        <script src='getroom.js'></script>
+        <style>
+            #contents {
+                padding-top: 15%;
+                margin: auto;
+            }
+            input[type=text] {
+                width: 200px;
+                padding: 12px 20px;
+                margin: 8px 0;
+                display: block;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+            button {
+                background-color: rgb(8, 141, 13); /* Green */
+                border: none;
+                color: white;
+                padding: 14px 40px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                cursor: pointer;
+            }
+            button:hover {
+                background-color: #4CAF50;
+                color: white;
+            }
+        </style>
     </head>
     <body>
-        <h1>Enter a room name</h1>
-        <input type="text" name="nameField" id="nameField">
-        <input type="text" name="roomField" id="rmFld">
-        <button name="submit" value = "submit" onclick="submitRoom()">Submit</button>
+        <div id="contents" align="center">
+            <h1>WORDSPY.IO</h1>
+            <input type="text" name="nameField" id="nameField" placeholder="Enter a user name">
+            <input type="text" name="roomField" id="rmFld" placeholder="Enter a room name">
+            <button name="submit" value = "submit" onclick="submitRoom()">Submit</button>
+        </div>
     </body>
 </html>

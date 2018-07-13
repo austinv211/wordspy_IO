@@ -33,12 +33,25 @@ class Room {
         this.cards = cards;
         this.gameStarted = false;
         this.winner = null;
-        this.players = [];
+        this.players = new Object();
     }
 
     //function to add a player to the room
-    addPlayer(player) {
-        this.players.push(player);
+    addPlayer(playerName, playerId, room) {
+        this.players[playerId] = (new Player(playerId, playerName, room));
+    }
+
+    //function to remove a player from the list
+    removePlayer(playerID) {
+        delete this.players[playerID];
+    }
+}
+
+class Player {
+    constructor(playerId, playerName, room) {
+        this.playerId = playerId;
+        this.name = playerName;
+        this.room = room;
     }
 }
 
@@ -113,24 +126,22 @@ app.use(express.static('public'));
 //on connection function
 io.on('connection', function(socket) {
     console.log("ID connected: " + socket.id);
-    socket.on('disconnect', function() {
-        console.log("ID disconnected: " + socket.id);
-    });
+
+    socket.roomName = {
+        room: null
+    };
     //on newPlayer, if the room is already created, add the player and send them room data, else create new room data
     socket.on('newPlayer', function(playerName, roomName) {
-        socket.player = {
-            name: playerName,
-            playerId: socket.id
-        };
 
         if (roomList.rooms[roomName]) {
             //log already created
             console.log(roomName + " already created");
-            console.log(socket.player.playerId + " joining room: " + roomName);
+            console.log(socket.id + " joining room: " + roomName);
             
             //add the player to the room
-            roomList.rooms[roomName].addPlayer(socket.player);
+            roomList.rooms[roomName].addPlayer(playerName, socket.id, roomName);
             socket.join(roomName);
+            socket.roomName.room = roomName;
             
             //if the game is started send them the cards
             if (roomList.rooms[roomName].gameStarted) {
@@ -143,10 +154,10 @@ io.on('connection', function(socket) {
             roomList.addRoom(roomName, createCardsServer());
 
             //log joining
-            console.log(socket.player.playerId + " joining room: " + socket.player.room);
+            console.log(socket.id + " joining room: " + roomName);
 
             //add the player to the room
-            roomList.rooms[roomName].addPlayer(socket.player);
+            roomList.rooms[roomName].addPlayer(playerName, socket.id, roomName);
             socket.join(roomName);        
         }
     });
@@ -222,6 +233,11 @@ io.on('connection', function(socket) {
 
         //send the players to everyone in the room
         io.in(room).emit('getPlayers', roomList.rooms[room].players);
+    });
+    socket.on('disconnect', function() {
+        roomList.rooms[socket.roomName.room].removePlayer(socket.id);
+        io.in(socket.roomName.room).emit('removePlayer', socket.id);
+        console.log("ID disconnected: " + socket.id);
     });
 });
 

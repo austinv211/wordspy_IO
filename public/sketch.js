@@ -10,8 +10,16 @@ class Game {
     this.players = new Object();
   }
 
-  addPlayer(name, team) {
-    this.players[name] = team;
+  addPlayer(playerId, name, team) {
+    this.players[playerId] = new Player(playerId, name, team);
+  }
+}
+
+class Player {
+  constructor(playerId, name, team) {
+    this.playerId = playerId;
+    this.name = name;
+    this.team = team;
   }
 }
 
@@ -39,29 +47,36 @@ Client.socket.on('nextTurn', function() {
 
 Client.socket.on('getPlayers', function(clients) {
   console.log("players in room");
-  for (var i = 0; i < clients.length; i++) {
-    console.log(clients[i]);
+
+  for (var key in clients) {
+    console.log(clients[key]);
     var userList = document.getElementById("userList");
 
-    if (document.getElementById("listItem" + i) === null) {
+    if (document.getElementById("listItem" + key) === null) {
       var li = document.createElement("li");
       var team;
-      if ((i + 1) % 2 == 0) {
+      
+      if (Math.floor(Math.random() * 2) == 0) {
         team = "blue";
       }
       else {
         team = "red";
       }
 
-      li.appendChild(document.createTextNode(clients[i].name + " team: " + team));
-      li.setAttribute("id", "listItem" + i);
+      li.appendChild(document.createTextNode(clients[key].name + " team: " + team));
+      li.setAttribute("id", "listItem" + key);
       userList.appendChild(li);
 
-      game.addPlayer(clients[i].name, team);
+      game.addPlayer(key, clients[key].name, team);
       console.log(game.players);
     }
   }
-  Client.setTeam(game.players[Client.playerName]);
+  Client.setTeam(game.players[Client.socket.id].team);
+});
+
+Client.socket.on('removePlayer', function(playerId) {
+  delete game.players[playerId];
+  document.getElementById("listItem" + playerId).remove();
 });
 
 Client.socket.on('newGame', function() {

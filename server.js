@@ -34,24 +34,28 @@ class Room {
         this.gameStarted = false;
         this.winner = null;
         this.players = new Object();
+        this.playerCount = 0;
     }
 
     //function to add a player to the room
-    addPlayer(playerName, playerId, room) {
-        this.players[playerId] = (new Player(playerId, playerName, room));
+    addPlayer(playerName, playerId, room, team) {
+        this.players[playerId] = (new Player(playerId, playerName, room, team));
+        this.playerCount++;
     }
 
     //function to remove a player from the list
     removePlayer(playerID) {
         delete this.players[playerID];
+        this.playerCount--;
     }
 }
 
 class Player {
-    constructor(playerId, playerName, room) {
+    constructor(playerId, playerName, room, team) {
         this.playerId = playerId;
         this.name = playerName;
         this.room = room;
+        this.team = team;
     }
 }
 
@@ -137,9 +141,22 @@ io.on('connection', function(socket) {
             //log already created
             console.log(roomName + " already created");
             console.log(socket.id + " joining room: " + roomName);
-            
+
+            var previousTeam;
+            var team;
+
+            if (previousTeam == null || previousTeam === "blue") {
+                team = "red";
+                console.log(team);
+            }
+            else {
+                team = "blue";
+            }
+
             //add the player to the room
-            roomList.rooms[roomName].addPlayer(playerName, socket.id, roomName);
+            roomList.rooms[roomName].addPlayer(playerName, socket.id, roomName, team);
+            previousTeam = roomList.rooms[roomName].players[socket.id].team;
+            console.log(previousTeam);
             socket.join(roomName);
             socket.roomName.room = roomName;
             
@@ -153,11 +170,13 @@ io.on('connection', function(socket) {
             //add the new room
             roomList.addRoom(roomName, createCardsServer());
 
+            socket.roomName.room = roomName;
+
             //log joining
             console.log(socket.id + " joining room: " + roomName);
 
             //add the player to the room
-            roomList.rooms[roomName].addPlayer(playerName, socket.id, roomName);
+            roomList.rooms[roomName].addPlayer(playerName, socket.id, roomName, "blue");
             socket.join(roomName);        
         }
     });
@@ -229,14 +248,24 @@ io.on('connection', function(socket) {
     //function on what to do when getplayers is asked for
     socket.on('getPlayers', function(room){
         console.log("sending players");
-        console.log("number of players " + roomList.rooms[room].players.length);
+        console.log("number of players " + roomList.rooms[room].playerCount);
 
         //send the players to everyone in the room
         io.in(room).emit('getPlayers', roomList.rooms[room].players);
     });
     socket.on('disconnect', function() {
-        roomList.rooms[socket.roomName.room].removePlayer(socket.id);
-        io.in(socket.roomName.room).emit('removePlayer', socket.id);
+        if (roomList.rooms[socket.roomName.room] != null) {
+            roomList.rooms[socket.roomName.room].removePlayer(socket.id);
+            io.in(socket.roomName.room).emit('removePlayer', socket.id);
+
+            if (roomList.rooms[socket.roomName.room].playerCount == 0) {
+                console.log("room " + socket.roomName.room + " deleted");
+                delete roomList.rooms[socket.roomName.room];
+            }
+        }
+        else {
+            console.log("room not found");
+        }
         console.log("ID disconnected: " + socket.id);
     });
 });

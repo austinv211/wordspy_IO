@@ -54,17 +54,17 @@ Client.socket.on('getPlayers', function(clients) {
 
     if (document.getElementById("listItem" + key) === null) {
       var li = document.createElement("li");
-      var team;
-      
-      if (Math.floor(Math.random() * 2) == 0) {
-        team = "blue";
+      var team = clients[key].team;
+    
+
+      li.appendChild(document.createTextNode(clients[key].name));
+      li.setAttribute("id", "listItem" + key);
+      if (team === "red") {
+        li.style.color = "#FF4447";
       }
       else {
-        team = "red";
+        li.style.color = "#5CCFF2";
       }
-
-      li.appendChild(document.createTextNode(clients[key].name + " team: " + team));
-      li.setAttribute("id", "listItem" + key);
       userList.appendChild(li);
 
       game.addPlayer(key, clients[key].name, team);

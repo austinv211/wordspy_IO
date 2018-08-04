@@ -77,7 +77,7 @@ var roomList = new RoomList();
 class CardServer {
 
     //constructor for the class, takes a x, y, word value, and whether the card is red or is blue
-    constructor(x, y, word, isRed, isBlue, col, textCol, isFlipped) {
+    constructor(x, y, word, isRed, isBlue, isBlack, isNon, col, textCol, isFlipped) {
         this.x = x;
         this.y = y;
         this.size = 100;
@@ -86,6 +86,8 @@ class CardServer {
         this.textCol = textCol;
         this.isBlue = isBlue;
         this.isRed = isRed;
+        this.isBlack = isBlack;
+        this.isNon = isNon;
         this.word = word;
     }
 }
@@ -100,7 +102,7 @@ function createCardsServer() {
     //create the number of cards and space them accordingly
     for (var i = 0; i < 5; i++) {
       for (var j = 0; j < 5; j++) {
-        var c = new CardServer(j * 150 + 45, 108 * i + 8,nouns[Math.floor(Math.random() * nouns.length - 1)] , false, false, [255, 100], [0, 0, 0], false);
+        var c = new CardServer(j * 150 + 45, 108 * i + 8,nouns[Math.floor(Math.random() * nouns.length - 1)] , false, false, false, false, [255, 100], [0, 0, 0], false);
         cards.push(c);
       }
     }
@@ -114,11 +116,17 @@ function createCardsServer() {
     for (var i = 0; i < numberOfCards; i++) {
       var r = cardNumbers[i];
   
-      if (i < ((numberOfCards - 1) / 2)) {
+      if (i < 7) {
         cards[r].isBlue = true;
       }
-      else if (i >= ((numberOfCards - 1) / 2) && i != numberOfCards - 1) {
+      else if (i >= 7 && i < 15) {
         cards[r].isRed = true;
+      }
+      else if (i >= 15 && i < 25) {
+        cards[r].isNon = true;
+      }
+      else {
+        cards[r].isBlack = true;
       }
     }
 
@@ -167,6 +175,7 @@ io.on('connection', function(socket) {
             
             //if the game is started send them the cards
             if (roomList.rooms[roomName].gameStarted) {
+                console.log("sending existing cards to: " + socket.id);
                 socket.emit('createCards', roomList.rooms[roomName].cards, roomList.rooms[roomName].mode, roomList.rooms[roomName].winner);
             }
         }
@@ -242,7 +251,7 @@ io.on('connection', function(socket) {
         for (var key in roomList.rooms[room].players) {
             roomList.rooms[room].players[key].isSpyMaster = false;
         }
-        
+
         //emit the new room to everyone in the room
         io.in(room).emit('newGame');
     });

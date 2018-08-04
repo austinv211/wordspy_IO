@@ -2,7 +2,7 @@
 class Card {
 
     //constructor for the class, takes a x, y, word value, and whether the card is red or is blue
-    constructor(x, y, word, isRed, isBlue, col, textCol, isFlipped) {
+    constructor(x, y, word, isRed, isBlue, isBlack, isNon, col, textCol, isFlipped) {
         this.x = x;
         this.y = y;
         this.size = 100;
@@ -11,6 +11,8 @@ class Card {
         this.isFlipped = isFlipped;
         this.isBlue = isBlue;
         this.isRed = isRed;
+        this.isBlack = isBlack;
+        this.isNon = isNon;
         this.word = word;
     }
   
@@ -35,9 +37,13 @@ class Card {
                 this.col = [92, 207, 242];
                 this.textCol = [255, 255, 255];
             }
-            else {
+            else if (this.isBlack) {
                 this.col = [200, 200, 200];
                 this.textCol = [0, 0, 0];
+            }
+            else if (this.isNon) {
+                this.col = [240, 255, 181];
+                this.textCol = [60, 61, 59];
             }
 
             this.isFlipped = true;

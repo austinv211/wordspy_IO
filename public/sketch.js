@@ -117,7 +117,7 @@ Client.socket.on('newGame', function() {
 
   //show the spymaster button
   document.getElementById("spyMasterButton").style.display = "inline-block";
-  
+
 });
 
 Client.socket.on('win', function(data) {
@@ -126,12 +126,14 @@ Client.socket.on('win', function(data) {
 });
 
 Client.socket.on('createCards', function(data, mode, winner) {
+  console.log("received cards");
   game.mode = mode;
+  console.log(mode);
   game.winner = winner;
   for (var i = 0; i < data.length; i++) {
     background(100);
     document.getElementById("readyBtn").style.display = "none";
-    game.cards.push(new Card(data[i].x, data[i].y, data[i].word, data[i].isRed, data[i].isBlue, data[i].col, data[i].textCol, data[i].isFlipped));
+    game.cards.push(new Card(data[i].x, data[i].y, data[i].word, data[i].isRed, data[i].isBlue, data[i].isBlack, data[i].isNon, data[i].col, data[i].textCol, data[i].isFlipped));
   }
 });
 
@@ -165,14 +167,21 @@ function draw() {
     text("Waiting for players to ready up...", 150, 200, 500, 100);
   }
   else if (game.mode === "game") {
-    if (!game.players[Client.socket.id].isSpyMaster) {
-      for (var i = 0; i < game.cards.length; i++) {
-        game.cards[i].display();
+    if (game.players[Client.socket.id] != null) {
+      if (!game.players[Client.socket.id].isSpyMaster) {
+        for (var i = 0; i < game.cards.length; i++) {
+          game.cards[i].display();
+        }
+      }
+      else {
+        for (var i = 0; i < game.cards.length; i++) {
+          game.cards[i].spyDisplay();
+        }
       }
     }
     else {
       for (var i = 0; i < game.cards.length; i++) {
-        game.cards[i].spyDisplay();
+        game.cards[i].display();
       }
     }
   }
@@ -230,7 +239,7 @@ function checkWin(teamColor) {
 
 //function to check whether the cards were clicked when the mous was pressed
 function mousePressed() {
-  if (!game.players[Client.socket.id].isSpyMaster) {
+  if (game.players[Client.socket.id] == null || !game.players[Client.socket.id].isSpyMaster) {
     for (var i = 0; i < game.cards.length; i++) {
       if (game.cards[i].click(mouseX, mouseY)) {
 

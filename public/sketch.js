@@ -140,7 +140,7 @@ var firework;
 
 //setup function to create the canvas and set the canvas to the correct div
 function setup() {
-  var cnv = createCanvas(800, 530);
+  var cnv = createCanvas(800, 550);
   background(100);
   cnv.parent('sketch-holder');
   gravity = createVector(0, 0.2);

@@ -94,13 +94,13 @@ class CardServer {
 function createCardsServer() {
 
     //create an array to store cards
-    var numberOfCards = 20;
+    var numberOfCards = 25;
     var cards = [];
   
     //create the number of cards and space them accordingly
-    for (var i = 0; i < 4; i++) {
+    for (var i = 0; i < 5; i++) {
       for (var j = 0; j < 5; j++) {
-        var c = new CardServer(j * 150 + 45, 115 * i + 45,nouns[Math.floor(Math.random() * nouns.length - 1)] , false, false, [255, 100], [0, 0, 0], false);
+        var c = new CardServer(j * 150 + 45, 108 * i + 8,nouns[Math.floor(Math.random() * nouns.length - 1)] , false, false, [255, 100], [0, 0, 0], false);
         cards.push(c);
       }
     }

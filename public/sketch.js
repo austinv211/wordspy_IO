@@ -126,7 +126,22 @@ Client.socket.on('win', function(data) {
 });
 
 Client.socket.on('createCards', function(data, mode, winner) {
-  console.log("received cards");
+  //hide the spyMaster button
+  document.getElementById("spyMasterButton").style.display = "none";
+
+  //show the turn button
+  document.getElementById("nextTurn").style.display = "inline-block";
+
+  //change to the correct display based on turn
+  if (game.turnNumber % 2 == 0 ) {
+    document.getElementById("nextTurn").textContent = "end red's turn";
+    document.getElementById("nextTurn").style.backgroundColor = "#FF4447";
+  }
+  else {
+    document.getElementById("nextTurn").textContent = "end blue's turn";
+    document.getElementById("nextTurn").style.backgroundColor = "#5CCFF2";
+  }
+
   game.mode = mode;
   console.log(mode);
   game.winner = winner;
@@ -239,28 +254,59 @@ function checkWin(teamColor) {
 
 //function to check whether the cards were clicked when the mous was pressed
 function mousePressed() {
-  if (game.players[Client.socket.id] == null || !game.players[Client.socket.id].isSpyMaster) {
-    for (var i = 0; i < game.cards.length; i++) {
-      if (game.cards[i].click(mouseX, mouseY)) {
+  if (game.players[Client.socket.id] != null && !game.players[Client.socket.id].isSpyMaster) {
 
-        var cardData = {
-          room: Client.room,
-          index: i,
-          col: game.cards[i].col,
-          textCol: game.cards[i].textCol,
-          isFlipped: game.cards[i].isFlipped
-        };
+    //if its red turn, only red can click
+    if (Client.team == "red" && game.turnNumber % 2 == 0) {
+      for (var i = 0; i < game.cards.length; i++) {
+        if (game.cards[i].click(mouseX, mouseY)) {
 
-        console.log(cardData);
-    
-        Client.socket.emit('cardUpdate', cardData);
+          var cardData = {
+            room: Client.room,
+            index: i,
+            col: game.cards[i].col,
+            textCol: game.cards[i].textCol,
+            isFlipped: game.cards[i].isFlipped
+          };
 
-        if (checkWin("red") && game.mode != "win") {
-          Client.socket.emit('win', "red", Client.room);
+          console.log(cardData);
+      
+          Client.socket.emit('cardUpdate', cardData);
+
+          if (checkWin("red") && game.mode != "win") {
+            Client.socket.emit('win', "red", Client.room);
+          }
+
+          if (checkWin("blue") && game.mode != "win") {
+            Client.socket.emit('win', "blue", Client.room);
+          }
         }
+      }
+    }
+    //if its blue turn, only blue can click
+    else if (Client.team === "blue" && game.turnNumber % 2 != 0) {
+      for (var i = 0; i < game.cards.length; i++) {
+        if (game.cards[i].click(mouseX, mouseY)) {
 
-        if (checkWin("blue") && game.mode != "win") {
-          Client.socket.emit('win', "blue", Client.room);
+          var cardData = {
+            room: Client.room,
+            index: i,
+            col: game.cards[i].col,
+            textCol: game.cards[i].textCol,
+            isFlipped: game.cards[i].isFlipped
+          };
+
+          console.log(cardData);
+      
+          Client.socket.emit('cardUpdate', cardData);
+
+          if (checkWin("red") && game.mode != "win") {
+            Client.socket.emit('win', "red", Client.room);
+          }
+
+          if (checkWin("blue") && game.mode != "win") {
+            Client.socket.emit('win', "blue", Client.room);
+          }
         }
       }
     }

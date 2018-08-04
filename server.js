@@ -122,7 +122,7 @@ function createCardsServer() {
       else if (i >= 7 && i < 15) {
         cards[r].isRed = true;
       }
-      else if (i >= 15 && i < 25) {
+      else if (i >= 15 && i < 24) {
         cards[r].isNon = true;
       }
       else {
@@ -215,6 +215,24 @@ io.on('connection', function(socket) {
             isFlipped: card.isFlipped,
             index: data.index
         };
+
+        //if the card is opposite color of player who clicked it, go to the next turn
+        if (roomList.rooms[room].players[socket.id].team === "blue") {
+            if (card.isRed) {
+                io.in(room).emit('nextTurn');
+            }
+            else if (card.isBlack) {
+                io.in(room).emit('win', "red");
+            }
+        }
+        else {
+            if (card.isBlue) {
+                io.in(room).emit('nextTurn');
+            }
+            else if (card.isBlack) {
+                io.in(room).emit('win', "blue");
+            }
+        }
 
         //emit the new card data to everyone in the room
         io.in(room).emit('cardUpdate', cardData);

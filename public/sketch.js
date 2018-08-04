@@ -109,6 +109,15 @@ Client.socket.on('newGame', function() {
   game.winner = null;
   game.room = Client.room;
   game.turnNumber = 1;
+
+  //make no one spymaster
+  for (var key in game.players) {
+    game.players[key].isSpyMaster = false;
+  }
+
+  //show the spymaster button
+  document.getElementById("spyMasterButton").style.display = "inline-block";
+  
 });
 
 Client.socket.on('win', function(data) {

@@ -238,6 +238,11 @@ io.on('connection', function(socket) {
     socket.on('newGame', function(room) {
         roomList.rooms[room].resetGame();
 
+        //make no one spymaster
+        for (var key in roomList.rooms[room].players) {
+            roomList.rooms[room].players[key].isSpyMaster = false;
+        }
+        
         //emit the new room to everyone in the room
         io.in(room).emit('newGame');
     });

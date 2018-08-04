@@ -38,8 +38,8 @@ class Room {
     }
 
     //function to add a player to the room
-    addPlayer(playerName, playerId, room, team) {
-        this.players[playerId] = (new Player(playerId, playerName, room, team));
+    addPlayer(playerName, playerId, room, team, isSpyMaster) {
+        this.players[playerId] = (new Player(playerId, playerName, room, team, isSpyMaster));
         this.playerCount++;
     }
 
@@ -51,11 +51,12 @@ class Room {
 }
 
 class Player {
-    constructor(playerId, playerName, room, team) {
+    constructor(playerId, playerName, room, team, isSpyMaster) {
         this.playerId = playerId;
         this.name = playerName;
         this.room = room;
         this.team = team;
+        this.isSpyMaster = isSpyMaster;
     }
 }
 
@@ -142,21 +143,17 @@ io.on('connection', function(socket) {
             console.log(roomName + " already created");
             console.log(socket.id + " joining room: " + roomName);
 
-            var previousTeam;
-            var team;
-
-            if (previousTeam == null || previousTeam === "blue") {
+            if (roomList.rooms[roomName].playerCount % 2 == 0) {
                 team = "red";
                 console.log(team);
             }
             else {
                 team = "blue";
+                console.log(team);
             }
 
             //add the player to the room
-            roomList.rooms[roomName].addPlayer(playerName, socket.id, roomName, team);
-            previousTeam = roomList.rooms[roomName].players[socket.id].team;
-            console.log(previousTeam);
+            roomList.rooms[roomName].addPlayer(playerName, socket.id, roomName, team, false);
             socket.join(roomName);
             socket.roomName.room = roomName;
             
@@ -176,7 +173,7 @@ io.on('connection', function(socket) {
             console.log(socket.id + " joining room: " + roomName);
 
             //add the player to the room
-            roomList.rooms[roomName].addPlayer(playerName, socket.id, roomName, "blue");
+            roomList.rooms[roomName].addPlayer(playerName, socket.id, roomName, "red", false);
             socket.join(roomName);        
         }
     });
@@ -253,6 +250,15 @@ io.on('connection', function(socket) {
         //send the players to everyone in the room
         io.in(room).emit('getPlayers', roomList.rooms[room].players);
     });
+
+    //function to handle when a player wants to be spyMaster
+    socket.on('makeSpyMaster', function(room) {
+        console.log("making player: " + socket.id + " spyMaster");
+        roomList.rooms[room].players[socket.id].isSpyMaster = true;
+        io.in(room).emit('makeSpyMaster', socket.id);
+    });
+
+    //function to handle when a player disconnects
     socket.on('disconnect', function() {
         if (roomList.rooms[socket.roomName.room] != null) {
             roomList.rooms[socket.roomName.room].removePlayer(socket.id);

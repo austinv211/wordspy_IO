@@ -10,16 +10,17 @@ class Game {
     this.players = new Object();
   }
 
-  addPlayer(playerId, name, team) {
-    this.players[playerId] = new Player(playerId, name, team);
+  addPlayer(playerId, name, team, isSpyMaster) {
+    this.players[playerId] = new Player(playerId, name, team, isSpyMaster);
   }
 }
 
 class Player {
-  constructor(playerId, name, team) {
+  constructor(playerId, name, team, isSpyMaster) {
     this.playerId = playerId;
     this.name = name;
     this.team = team;
+    this.isSpyMaster = isSpyMaster;
   }
 }
 
@@ -53,6 +54,8 @@ Client.socket.on('getPlayers', function(clients) {
     var userList = document.getElementById("userList");
 
     if (document.getElementById("listItem" + key) === null) {
+      var row = document.createElement("div");
+
       var li = document.createElement("li");
       var team = clients[key].team;
     
@@ -65,13 +68,23 @@ Client.socket.on('getPlayers', function(clients) {
       else {
         li.style.color = "#5CCFF2";
       }
-      userList.appendChild(li);
+      row.appendChild(li);
+      userList.appendChild(row);
 
-      game.addPlayer(key, clients[key].name, team);
+      game.addPlayer(key, clients[key].name, team, clients[key].isSpyMaster);
       console.log(game.players);
     }
   }
   Client.setTeam(game.players[Client.socket.id].team);
+});
+
+Client.socket.on('makeSpyMaster', function(playerId) {
+  game.players[playerId].isSpyMaster = true;
+  console.log("player " + playerId + " is now spyMaster");
+
+  if (Client.socket.id !== playerId && game.players[playerId].team === Client.team) {
+    document.getElementById("spyMasterButton").style.display = "inline-block";
+  }
 });
 
 Client.socket.on('removePlayer', function(playerId) {
@@ -82,7 +95,7 @@ Client.socket.on('removePlayer', function(playerId) {
 Client.socket.on('newGame', function() {
   console.log("newGame");
   background(100);
-  document.getElementById("readyBtn").style.display = "inline-block"
+  document.getElementById("readyBtn").style.display = "inline-block";
   document.getElementById("newGame").style.display = "none";
   game.mode = "lobby"
   game.cards = [];
@@ -237,6 +250,12 @@ function newGame() {
 
 function nextTurn() {
   Client.socket.emit('nextTurn', game.room);
+}
+
+//function to make a player spyMaster
+function makeSpyMaster() {
+  Client.socket.emit('makeSpyMaster', game.room);
+  document.getElementById("spyMasterButton").style.display = "none";
 }
 
 

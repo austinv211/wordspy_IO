@@ -79,6 +79,14 @@ Client.socket.on('getPlayers', function(clients) {
 });
 
 Client.socket.on('makeSpyMaster', function(playerId) {
+  
+  for (var p in game.players) {
+    if (game.players[playerId].team === game.players[p].team) {
+      console.log("setting false for player: " + game.players[p].name);
+      game.players[p].isSpyMaster = false;
+    }
+  }
+
   game.players[playerId].isSpyMaster = true;
   console.log("player " + playerId + " is now spyMaster");
 
@@ -96,7 +104,6 @@ Client.socket.on('newGame', function() {
   console.log("newGame");
   background(100);
   document.getElementById("readyBtn").style.display = "inline-block";
-  document.getElementById("newGame").style.display = "none";
   game.mode = "lobby"
   game.cards = [];
   game.winner = null;
@@ -107,7 +114,6 @@ Client.socket.on('newGame', function() {
 Client.socket.on('win', function(data) {
   changeMode("win");
   game.winner = data;
-  document.getElementById("newGame").style.display = "inline-block";
 });
 
 Client.socket.on('createCards', function(data, mode, winner) {
@@ -150,8 +156,15 @@ function draw() {
     text("Waiting for players to ready up...", 150, 200, 500, 100);
   }
   else if (game.mode === "game") {
-    for (var i = 0; i < game.cards.length; i++) {
-      game.cards[i].display();
+    if (!game.players[Client.socket.id].isSpyMaster) {
+      for (var i = 0; i < game.cards.length; i++) {
+        game.cards[i].display();
+      }
+    }
+    else {
+      for (var i = 0; i < game.cards.length; i++) {
+        game.cards[i].spyDisplay();
+      }
     }
   }
   else if (game.mode === "win") {
@@ -208,28 +221,29 @@ function checkWin(teamColor) {
 
 //function to check whether the cards were clicked when the mous was pressed
 function mousePressed() {
+  if (!game.players[Client.socket.id].isSpyMaster) {
+    for (var i = 0; i < game.cards.length; i++) {
+      if (game.cards[i].click(mouseX, mouseY)) {
 
-  for (var i = 0; i < game.cards.length; i++) {
-    if (game.cards[i].click(mouseX, mouseY)) {
+        var cardData = {
+          room: Client.room,
+          index: i,
+          col: game.cards[i].col,
+          textCol: game.cards[i].textCol,
+          isFlipped: game.cards[i].isFlipped
+        };
 
-      var cardData = {
-        room: Client.room,
-        index: i,
-        col: game.cards[i].col,
-        textCol: game.cards[i].textCol,
-        isFlipped: game.cards[i].isFlipped
-      };
+        console.log(cardData);
+    
+        Client.socket.emit('cardUpdate', cardData);
 
-      console.log(cardData);
-  
-      Client.socket.emit('cardUpdate', cardData);
+        if (checkWin("red") && game.mode != "win") {
+          Client.socket.emit('win', "red", Client.room);
+        }
 
-      if (checkWin("red") && game.mode != "win") {
-        Client.socket.emit('win', "red", Client.room);
-      }
-
-      if (checkWin("blue") && game.mode != "win") {
-        Client.socket.emit('win', "blue", Client.room);
+        if (checkWin("blue") && game.mode != "win") {
+          Client.socket.emit('win', "blue", Client.room);
+        }
       }
     }
   }

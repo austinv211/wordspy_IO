@@ -59,4 +59,23 @@ class Card {
         textAlign(CENTER, CENTER);
         text(this.word, this.x, this.y, 120, 100);
     }
+
+    //function for spymaster display
+    spyDisplay() {
+        noStroke();
+        fill(this.col);
+        rect(this.x, this.y, 120, 100, 5, 5, 5, 5);
+        if (this.isRed && !this.isFlipped) {
+            fill(255, 68, 71);
+        }
+        else if(this.isBlue && !this.isFlipped) {
+            fill(92, 207, 242);
+        }
+        else {
+            fill(this.textCol);
+        }
+        textSize(18);
+        textAlign(CENTER, CENTER);
+        text(this.word, this.x, this.y, 120, 100);
+    }
 }

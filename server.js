@@ -48,6 +48,14 @@ class Room {
         delete this.players[playerID];
         this.playerCount--;
     }
+
+    //function to reset game
+    resetGame(cards) {
+        this.cards = createCardsServer();
+        this.mode = "lobby"
+        this.gameStarted = false;
+        this.winner = null;
+    }
 }
 
 class Player {
@@ -228,11 +236,7 @@ io.on('connection', function(socket) {
 
     //function to handle what to do when new game is called
     socket.on('newGame', function(room) {
-        //delete the room data
-        delete roomList.rooms[room];
-
-        //create new room data
-        roomList.addRoom(room, createCardsServer());
+        roomList.rooms[room].resetGame();
 
         //emit the new room to everyone in the room
         io.in(room).emit('newGame');
@@ -254,6 +258,14 @@ io.on('connection', function(socket) {
     //function to handle when a player wants to be spyMaster
     socket.on('makeSpyMaster', function(room) {
         console.log("making player: " + socket.id + " spyMaster");
+
+        for (var key in roomList.rooms[room].players) {
+            if (roomList.rooms[room].players[key].team === roomList.rooms[room].players[socket.id].team) {
+                console.log("setting false for player: " + roomList.rooms[room].players[key].name);
+                roomList.rooms[room].players[key].isSpyMaster = false;
+            }
+        }
+
         roomList.rooms[room].players[socket.id].isSpyMaster = true;
         io.in(room).emit('makeSpyMaster', socket.id);
     });

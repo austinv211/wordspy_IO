@@ -1,5 +1,5 @@
-//variables to start with
 
+//Game class to represent the game
 class Game {
   constructor () {
     this.room = Client.room;
@@ -10,11 +10,13 @@ class Game {
     this.players = new Object();
   }
 
+  //function to add a player
   addPlayer(playerId, name, team, isSpyMaster) {
     this.players[playerId] = new Player(playerId, name, team, isSpyMaster);
   }
 }
 
+//Player class to represent a player
 class Player {
   constructor(playerId, name, team, isSpyMaster) {
     this.playerId = playerId;
@@ -24,18 +26,22 @@ class Player {
   }
 }
 
+//create an instance of the game object
 var game = new Game();
 
+//function to change the game mode
 function changeMode(mode) {
   game.mode = mode;
   Client.socket.emit('modeUpdate', game.room, game.mode);
 }
 
+//handler to handle next turn
 Client.socket.on('nextTurn', function() {
-  console.log("increasing turn");
+
+  //increase the turn number
   game.turnNumber++;
-  console.log(game.turnNumber);
-  console.log(document.getElementById("nextTurn").value)
+
+  //set the turn button style based on the turn number
   if (game.turnNumber % 2 == 0 ) {
     document.getElementById("nextTurn").textContent = "end red's turn";
     document.getElementById("nextTurn").style.backgroundColor = "#FF4447";
@@ -46,64 +52,86 @@ Client.socket.on('nextTurn', function() {
   }
 });
 
+//handler to handle players in the room
 Client.socket.on('getPlayers', function(clients) {
-  console.log("players in room");
 
+  //loop through each key and add to the user list accordingly
   for (var key in clients) {
-    console.log(clients[key]);
+
+    //save the userList element to a variable
     var userList = document.getElementById("userList");
 
+    //if the list item doesn't exist, create it
     if (document.getElementById("listItem" + key) === null) {
+
+      //create a div to hold row
       var row = document.createElement("div");
 
+      //create the list item and get the team
       var li = document.createElement("li");
       var team = clients[key].team;
     
-
+      //append elements and set attributes
       li.appendChild(document.createTextNode(clients[key].name));
       li.setAttribute("id", "listItem" + key);
+
+      //style based on team
       if (team === "red") {
         li.style.color = "#FF4447";
       }
       else {
         li.style.color = "#5CCFF2";
       }
+
+      //append to row and user list
       row.appendChild(li);
       userList.appendChild(row);
 
+      //add the player to the game
       game.addPlayer(key, clients[key].name, team, clients[key].isSpyMaster);
-      console.log(game.players);
     }
   }
+
+  //set the team for the client
   Client.setTeam(game.players[Client.socket.id].team);
 });
 
+//handler on what to do when a spymaster is requested
 Client.socket.on('makeSpyMaster', function(playerId) {
   
+  //make all players on the same team not spymaster
   for (var p in game.players) {
     if (game.players[playerId].team === game.players[p].team) {
-      console.log("setting false for player: " + game.players[p].name);
       game.players[p].isSpyMaster = false;
     }
   }
 
+  //set the spymaster
   game.players[playerId].isSpyMaster = true;
-  console.log("player " + playerId + " is now spyMaster");
 
+  //show the button
   if (Client.socket.id !== playerId && game.players[playerId].team === Client.team) {
     document.getElementById("spyMasterButton").style.display = "inline-block";
   }
 });
 
+//handler on what to do when a player leaves
 Client.socket.on('removePlayer', function(playerId) {
   delete game.players[playerId];
   document.getElementById("listItem" + playerId).remove();
 });
 
+//handler on what to do when a new game is sent
 Client.socket.on('newGame', function() {
-  console.log("newGame");
+
+  //set the background
   background(100);
+
+  //show the ready button and hide the nextTurn button
   document.getElementById("readyBtn").style.display = "inline-block";
+  document.getElementById("nextTurn").style.display = "none";
+
+  //set the game attributes back to defaults
   game.mode = "lobby"
   game.cards = [];
   game.winner = null;
@@ -120,11 +148,19 @@ Client.socket.on('newGame', function() {
 
 });
 
+//handler on what to do when a win event is sent
 Client.socket.on('win', function(data) {
+  //change the mode to win
   changeMode("win");
+
+  //hide the next turn button
+  document.getElementById("nextTurn").style.display = "none";
+
+  //set the winner
   game.winner = data;
 });
 
+//handler on what to do when cards are sent
 Client.socket.on('createCards', function(data, mode, winner) {
   //hide the spyMaster button
   document.getElementById("spyMasterButton").style.display = "none";
@@ -142,9 +178,11 @@ Client.socket.on('createCards', function(data, mode, winner) {
     document.getElementById("nextTurn").style.backgroundColor = "#5CCFF2";
   }
 
+  //set the game mode and winner
   game.mode = mode;
-  console.log(mode);
   game.winner = winner;
+
+  //add the cards to the game cards
   for (var i = 0; i < data.length; i++) {
     background(100);
     document.getElementById("readyBtn").style.display = "none";
@@ -152,6 +190,7 @@ Client.socket.on('createCards', function(data, mode, winner) {
   }
 });
 
+//handler on what to do when a card update is sent
 Client.socket.on('cardUpdate', function(data) {
   game.cards[data.index].col = data.col;
   game.cards[data.index].textCol = data.textCol;
@@ -162,25 +201,29 @@ Client.socket.on('cardUpdate', function(data) {
 var gravity;
 var firework;
 
-
-
 //setup function to create the canvas and set the canvas to the correct div
 function setup() {
   var cnv = createCanvas(800, 550);
   background(100);
   cnv.parent('sketch-holder');
+
+  //firework variables
   gravity = createVector(0, 0.2);
   firework = new Particle(width / 2, height, createVector(1, -15));
 }
 
-//function to draw the cards
+//function to draw the game
 function draw() {
+
+  //if the game mode is in lobby, show the waiting screen
   if (game.mode === "lobby") {
     fill(255, 255, 255);
     textSize(40);
     textAlign(CENTER);
     text("Waiting for players to ready up...", 150, 200, 500, 100);
   }
+
+  //if in game mode, show the game
   else if (game.mode === "game") {
     if (game.players[Client.socket.id] != null) {
       if (!game.players[Client.socket.id].isSpyMaster) {
@@ -200,6 +243,8 @@ function draw() {
       }
     }
   }
+
+  //if in win mode, display the fireworks
   else if (game.mode === "win") {
     background(0);
     firework.applyForce(gravity);
@@ -221,11 +266,14 @@ function draw() {
     fill(105, 117, 119, 5);
     rect(245, 200, 300, 100);
   }
+
+  //unrecognized if option
   else {
-    console.log("unrecognized game mode" + game.mode);
+    console.log("ERROR: unrecognized game mode" + game.mode);
   }
 }
 
+//function to check if a team has won
 function checkWin(teamColor) {
 
   if (teamColor === "red") {
@@ -268,8 +316,6 @@ function mousePressed() {
             textCol: game.cards[i].textCol,
             isFlipped: game.cards[i].isFlipped
           };
-
-          console.log(cardData);
       
           Client.socket.emit('cardUpdate', cardData);
 
@@ -296,7 +342,6 @@ function mousePressed() {
             isFlipped: game.cards[i].isFlipped
           };
 
-          console.log(cardData);
       
           Client.socket.emit('cardUpdate', cardData);
 
@@ -315,14 +360,12 @@ function mousePressed() {
 
 //submitfunction, changes to next turn
 function submit() {
-  console.log("button clicked!");
-  console.log(game.room);
   changeMode("game");
   Client.socket.emit('startGame', game.room);
 }
 
+//function to ask for a new game
 function newGame() {
-  console.log("new game requested");
   Client.socket.emit('newGame', game.room);
 }
 
@@ -334,24 +377,4 @@ function nextTurn() {
 function makeSpyMaster() {
   Client.socket.emit('makeSpyMaster', game.room);
   document.getElementById("spyMasterButton").style.display = "none";
-}
-
-
-//function to check the turn number, returns true if it is the next turn
-function checkTurnNumber() {
-  //get the previous turn
-  var previousTurn = turnStack.peek();
-  //add the current turn to the Stack
-  turnStack.push(turnNumber);
-
-  //if the current turn is greater than the previous turn, return true
-  if (turnStack.peek() > previousTurn) {
-    return true;
-  }
-  //else return false and log 'not your turn' to the console
-  else {
-    console.log("not your turn");
-    return false;
-  }
-  
 }

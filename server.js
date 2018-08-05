@@ -116,10 +116,10 @@ function createCardsServer() {
     for (var i = 0; i < numberOfCards; i++) {
       var r = cardNumbers[i];
   
-      if (i < 7) {
+      if (i < 8) {
         cards[r].isBlue = true;
       }
-      else if (i >= 7 && i < 15) {
+      else if (i >= 8 && i < 15) {
         cards[r].isRed = true;
       }
       else if (i >= 15 && i < 24) {
@@ -155,17 +155,12 @@ io.on('connection', function(socket) {
     socket.on('newPlayer', function(playerName, roomName) {
 
         if (roomList.rooms[roomName]) {
-            //log already created
-            console.log(roomName + " already created");
-            console.log(socket.id + " joining room: " + roomName);
-
+            //get the team the player should be on
             if (roomList.rooms[roomName].playerCount % 2 == 0) {
                 team = "red";
-                console.log(team);
             }
             else {
                 team = "blue";
-                console.log(team);
             }
 
             //add the player to the room
@@ -175,7 +170,6 @@ io.on('connection', function(socket) {
             
             //if the game is started send them the cards
             if (roomList.rooms[roomName].gameStarted) {
-                console.log("sending existing cards to: " + socket.id);
                 socket.emit('createCards', roomList.rooms[roomName].cards, roomList.rooms[roomName].mode, roomList.rooms[roomName].winner);
             }
         }
@@ -184,10 +178,8 @@ io.on('connection', function(socket) {
             //add the new room
             roomList.addRoom(roomName, createCardsServer());
 
+            //save the roomName to the socket
             socket.roomName.room = roomName;
-
-            //log joining
-            console.log(socket.id + " joining room: " + roomName);
 
             //add the player to the room
             roomList.rooms[roomName].addPlayer(playerName, socket.id, roomName, "red", false);
@@ -198,7 +190,7 @@ io.on('connection', function(socket) {
     socket.on('modeUpdate', function(roomName, mode) {
         //update room data mode
         roomList.rooms[roomName].mode = mode;
-        console.log("change mode to: " + roomList.rooms[roomName].mode);
+
     });
     //function to handle what happens when card update is sent
     socket.on('cardUpdate', function(data) {
@@ -209,12 +201,18 @@ io.on('connection', function(socket) {
         card.textCol = data.textCol;
         card.isFlipped = data.isFlipped;
 
+        //variable to store the card data to send
         var cardData = {
             col: card.col,
             textCol: card.textCol,
             isFlipped: card.isFlipped,
             index: data.index
         };
+
+        //if the card clicked is a nuetral, increment to next turn
+        if (card.isNon) {
+            io.in(room).emit('nextTurn');
+        }
 
         //if the card is opposite color of player who clicked it, go to the next turn
         if (roomList.rooms[room].players[socket.id].team === "blue") {
@@ -241,7 +239,7 @@ io.on('connection', function(socket) {
     socket.on('startGame', function(data) {
         //save the room name
         var roomName = String(data);
-        console.log(roomName);
+
         //change the mode and gameStarted values
         roomList.rooms[roomName].mode = "game";
         roomList.rooms[roomName].gameStarted = true;
@@ -263,6 +261,8 @@ io.on('connection', function(socket) {
 
     //function to handle what to do when new game is called
     socket.on('newGame', function(room) {
+
+        //reset the game in the roomList
         roomList.rooms[room].resetGame();
 
         //make no one spymaster
@@ -280,25 +280,24 @@ io.on('connection', function(socket) {
 
     //function on what to do when getplayers is asked for
     socket.on('getPlayers', function(room){
-        console.log("sending players");
-        console.log("number of players " + roomList.rooms[room].playerCount);
-
         //send the players to everyone in the room
         io.in(room).emit('getPlayers', roomList.rooms[room].players);
     });
 
     //function to handle when a player wants to be spyMaster
     socket.on('makeSpyMaster', function(room) {
-        console.log("making player: " + socket.id + " spyMaster");
 
+        //set false for all players on the same team
         for (var key in roomList.rooms[room].players) {
             if (roomList.rooms[room].players[key].team === roomList.rooms[room].players[socket.id].team) {
-                console.log("setting false for player: " + roomList.rooms[room].players[key].name);
                 roomList.rooms[room].players[key].isSpyMaster = false;
             }
         }
 
+        //set the socket player to spyMaster
         roomList.rooms[room].players[socket.id].isSpyMaster = true;
+
+        //emit the spyMaster event to everyone in the room
         io.in(room).emit('makeSpyMaster', socket.id);
     });
 
@@ -308,13 +307,13 @@ io.on('connection', function(socket) {
             roomList.rooms[socket.roomName.room].removePlayer(socket.id);
             io.in(socket.roomName.room).emit('removePlayer', socket.id);
 
+            //if the room is now empty, delete it
             if (roomList.rooms[socket.roomName.room].playerCount == 0) {
-                console.log("room " + socket.roomName.room + " deleted");
                 delete roomList.rooms[socket.roomName.room];
             }
         }
         else {
-            console.log("room not found");
+            console.log("ERROR: room not found");
         }
         console.log("ID disconnected: " + socket.id);
     });
@@ -322,5 +321,5 @@ io.on('connection', function(socket) {
 
 //listen on port 3000 via http
 http.listen(3000,'0.0.0.0', function() {
-    console.log("listening on 3000");
+    console.log("listening on PORT: 3000");
 });

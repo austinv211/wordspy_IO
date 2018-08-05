@@ -22,12 +22,6 @@ class Card {
         var isInYBounds = (posY >= this.y && posY <= (this.y + this.size));
         
         if (isInXBounds && isInYBounds) {
-            if (this.isFlipped) {
-                console.log("already flipped");
-            }
-            else {
-                console.log("card flipped");
-            }
             
             if (this.isRed) {
                 this.col = [255, 68, 71];
@@ -55,8 +49,6 @@ class Card {
   
     //function to display the card
     display() {
-        // strokeWeight(1);
-        // stroke(0);
         noStroke();
         fill(this.col);
         rect(this.x, this.y, 120, 100, 5, 5, 5, 5);
@@ -76,6 +68,12 @@ class Card {
         }
         else if(this.isBlue && !this.isFlipped) {
             fill(92, 207, 242);
+        }
+        else if (this.isBlack && !this.isFlipped) {
+            fill(0, 0, 0);
+        }
+        else if (this.isNon && !this.isFlipped) {
+            fill(127, 127, 127);
         }
         else {
             fill(this.textCol);

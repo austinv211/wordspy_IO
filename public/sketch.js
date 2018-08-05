@@ -50,17 +50,17 @@ function setup() {
 
   //handler on what to do when cards are sent
   Client.socket.on('createCards', function(data, mode, winner) {
-
-    console.log("received cards");
     
     //set the background back to the original value
     background(100);
 
-    //hide the spyMaster button
+    //hide the spyMaster button and start game button
     document.getElementById("spyMasterButton").style.display = "none";
+    document.getElementById("readyBtn").style.display = "none";
 
-    //show the turn button
+    //show the turn button and new Game button
     document.getElementById("nextTurn").style.display = "inline-block";
+    document.getElementById("newGame").style.display = "inline-block";
 
     //change to the correct display based on turn
     if (game.turnNumber % 2 == 0 ) {
@@ -174,9 +174,10 @@ function setup() {
     //set the background
     background(100);
 
-    //show the ready button and hide the nextTurn button
+    //show the ready button and hide the nextTurn button and hide the new game button
     document.getElementById("readyBtn").style.display = "inline-block";
     document.getElementById("nextTurn").style.display = "none";
+    document.getElementById("newGame").style.display = "none";
 
     //set the game attributes back to defaults
     game.mode = "lobby"

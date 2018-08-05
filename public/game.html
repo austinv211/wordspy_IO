@@ -51,6 +51,7 @@
         border: none;
         color: white;
         padding: 14px 40px;
+        width: 250px;
         text-align: center;
         text-decoration: none;
         display: inline-block;
@@ -112,16 +113,7 @@
       }
 
       #newGame {
-        background-color: rgb(8, 141, 13); /* Green */
-        border: none;
-        color: white;
-        padding: 14px 40px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
-        margin: 4px 2px;
-        cursor: pointer;
+        display: none;
       }
 
       #newGame:hover {
@@ -195,8 +187,8 @@
       <h2 id="userHeader">Users</h2>
       <ul id="userList"></ul>
       <button id="spyMasterButton" name = "spyButton" value = "spyMaster" onclick = "makeSpyMaster()">SpyMaster</button>
-      <button id="readyBtn" name = "button" value = "clicked" onclick="submit()">Ready</button>
-      <button id="newGame" name="button1" class= "newGameButton" value = "newGame" onclick="newGame()">newGame</button>
+      <button id="readyBtn" name = "button" value = "clicked" onclick="submit()">Start Game</button>
+      <button id="newGame" name="button1" class= "newGameButton" value = "newGame" onclick="newGame()">New Game</button>
     </div>
     <div id="sketchContainer" class="sketchContainer" align="center">
       <div id="topSketch" class="topSketch" align="center">
@@ -205,7 +197,7 @@
         <!-- sketch will go here -->
       </div>
       <div id="bottomSketch" class="bottomSketch" align="center">
-        <button id="nextTurn" name="button2" class= "nextTurnButton" value = "nextTurn" onclick="nextTurn()">nextTurn</button>
+        <button id="nextTurn" name="button2" class= "nextTurnButton" value = "nextTurn" onclick="nextTurn()">Next Turn</button>
       </div>
     </div>
   </body>

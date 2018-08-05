@@ -69,7 +69,7 @@ function setup() {
     }
     else {
       document.getElementById("nextTurn").textContent = "end blue's turn";
-      document.getElementById("nextTurn").style.backgroundColor = "#5CCFF2";
+      document.getElementById("nextTurn").style.backgroundColor = "#237fe0";
     }
 
     //set the game mode and winner
@@ -95,7 +95,7 @@ function setup() {
     }
     else {
       document.getElementById("nextTurn").textContent = "end blue's turn";
-      document.getElementById("nextTurn").style.backgroundColor = "#5CCFF2";
+      document.getElementById("nextTurn").style.backgroundColor = "#237fe0";
     }
   });
 
@@ -127,7 +127,7 @@ function setup() {
           li.style.color = "#FF4447";
         }
         else {
-          li.style.color = "#5CCFF2";
+          li.style.color = "#237fe0";
         }
 
         //append to row and user list

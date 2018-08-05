@@ -28,7 +28,7 @@ class Card {
                 this.textCol = [255, 255, 255];
             }
             else if (this.isBlue) {
-                this.col = [52, 143, 239];
+                this.col = [35, 127, 224];
                 this.textCol = [255, 255, 255];
             }
             else if (this.isBlack) {
@@ -67,7 +67,7 @@ class Card {
             fill(255, 68, 71);
         }
         else if(this.isBlue && !this.isFlipped) {
-            fill(52, 143, 239);
+            fill(35, 127, 224);
         }
         else if (this.isBlack && !this.isFlipped) {
             fill(0, 0, 0);

@@ -50,6 +50,9 @@ function setup() {
 
   //handler on what to do when cards are sent
   Client.socket.on('createCards', function(data, mode, winner) {
+
+    console.log("received cards");
+    
     //set the background back to the original value
     background(100);
 

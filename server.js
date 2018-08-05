@@ -169,7 +169,7 @@ io.on('connection', function(socket) {
             socket.roomName.room = roomName;
             
             //if the game is started send them the cards
-            if (roomList.rooms[roomName].gameStarted) {
+            if (roomList.rooms[roomName].mode === "game") {
                 socket.emit('createCards', roomList.rooms[roomName].cards, roomList.rooms[roomName].mode, roomList.rooms[roomName].winner);
             }
         }

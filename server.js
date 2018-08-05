@@ -170,7 +170,10 @@ io.on('connection', function(socket) {
             
             //if the game is started send them the cards
             if (roomList.rooms[roomName].mode === "game") {
-                socket.emit('createCards', roomList.rooms[roomName].cards, roomList.rooms[roomName].mode, roomList.rooms[roomName].winner);
+                //once a loaded is received, send the cards
+                socket.once('loaded', function() {
+                    socket.emit('createCards', roomList.rooms[roomName].cards, roomList.rooms[roomName].mode, roomList.rooms[roomName].winner);
+                });
             }
         }
         //if room is not created, create new room data

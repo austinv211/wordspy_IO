@@ -215,6 +215,8 @@ function setup() {
   });
 }
 
+Client.socket.emit('loaded');
+
 //function to draw the game
 function draw() {
 

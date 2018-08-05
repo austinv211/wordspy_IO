@@ -48,6 +48,37 @@ function setup() {
   gravity = createVector(0, 0.2);
   firework = new Particle(width / 2, height, createVector(1, -15));
 
+  //handler on what to do when cards are sent
+  Client.socket.on('createCards', function(data, mode, winner) {
+    //set the background back to the original value
+    background(100);
+
+    //hide the spyMaster button
+    document.getElementById("spyMasterButton").style.display = "none";
+
+    //show the turn button
+    document.getElementById("nextTurn").style.display = "inline-block";
+
+    //change to the correct display based on turn
+    if (game.turnNumber % 2 == 0 ) {
+      document.getElementById("nextTurn").textContent = "end red's turn";
+      document.getElementById("nextTurn").style.backgroundColor = "#FF4447";
+    }
+    else {
+      document.getElementById("nextTurn").textContent = "end blue's turn";
+      document.getElementById("nextTurn").style.backgroundColor = "#5CCFF2";
+    }
+
+    //set the game mode and winner
+    game.mode = mode;
+    game.winner = winner;
+
+    //add the cards to the game cards
+    for (var i = 0; i < data.length; i++) {
+      game.cards.push(new Card(data[i].x, data[i].y, data[i].word, data[i].isRed, data[i].isBlue, data[i].isBlack, data[i].isNon, data[i].col, data[i].textCol, data[i].isFlipped));
+    }
+  });
+
     //handler to handle next turn
   Client.socket.on('nextTurn', function() {
 
@@ -171,38 +202,6 @@ function setup() {
 
     //set the winner
     game.winner = data;
-  });
-
-  //handler on what to do when cards are sent
-  Client.socket.on('createCards', function(data, mode, winner) {
-
-    //set the background back to the original value
-    background(100);
-
-    //hide the spyMaster button
-    document.getElementById("spyMasterButton").style.display = "none";
-
-    //show the turn button
-    document.getElementById("nextTurn").style.display = "inline-block";
-
-    //change to the correct display based on turn
-    if (game.turnNumber % 2 == 0 ) {
-      document.getElementById("nextTurn").textContent = "end red's turn";
-      document.getElementById("nextTurn").style.backgroundColor = "#FF4447";
-    }
-    else {
-      document.getElementById("nextTurn").textContent = "end blue's turn";
-      document.getElementById("nextTurn").style.backgroundColor = "#5CCFF2";
-    }
-
-    //set the game mode and winner
-    game.mode = mode;
-    game.winner = winner;
-
-    //add the cards to the game cards
-    for (var i = 0; i < data.length; i++) {
-      game.cards.push(new Card(data[i].x, data[i].y, data[i].word, data[i].isRed, data[i].isBlue, data[i].isBlack, data[i].isNon, data[i].col, data[i].textCol, data[i].isFlipped));
-    }
   });
 
   //handler on what to do when a card update is sent

@@ -58,9 +58,10 @@ function setup() {
     document.getElementById("spyMasterButton").style.display = "none";
     document.getElementById("readyBtn").style.display = "none";
 
-    //show the turn button and new Game button
+    //show the turn button and new Game button and textScore
     document.getElementById("nextTurn").style.display = "inline-block";
     document.getElementById("newGame").style.display = "inline-block";
+    document.getElementById("topSketch").style.display = "inline-block";
 
     //change to the correct display based on turn
     if (game.turnNumber % 2 == 0 ) {
@@ -80,6 +81,34 @@ function setup() {
     for (var i = 0; i < data.length; i++) {
       game.cards.push(new Card(data[i].x, data[i].y, data[i].word, data[i].isRed, data[i].isBlue, data[i].isBlack, data[i].isNon, data[i].col, data[i].textCol, data[i].isFlipped));
     }
+
+    //update the score if any are clicked
+    var blueFlipped = 0;
+    var redFlipped = 0;
+
+    for (var i = 0; i < game.cards.length; i++) {
+      if (game.cards[i].isFlipped) {
+        if (game.cards[i].isBlue) {
+          blueFlipped++;
+        }
+        else if (game.cards[i].isRed){
+          redFlipped++;
+        }
+        else {
+          //do not increase a counter
+        }
+      }
+    }
+
+    //set the values on the scoreCounters
+    var redText = document.getElementById("redScore");
+    var blueText = document.getElementById("blueScore");
+
+    var redCurrScore = parseInt(redText.innerHTML);
+    var blueCurrScore = parseInt(blueText.innerHTML);
+
+    redText.innerHTML = (redCurrScore - redFlipped);
+    blueText.innerHTML = (blueCurrScore - blueFlipped);
   });
 
     //handler to handle next turn
@@ -174,10 +203,11 @@ function setup() {
     //set the background
     background(100);
 
-    //show the ready button and hide the nextTurn button and hide the new game button
+    //show the ready button and hide the nextTurn button and hide the new game button and hide the topScore
     document.getElementById("readyBtn").style.display = "inline-block";
     document.getElementById("nextTurn").style.display = "none";
     document.getElementById("newGame").style.display = "none";
+    document.getElementById("topSketch").style.display = "none";
 
     //set the game attributes back to defaults
     game.mode = "lobby"
@@ -210,9 +240,28 @@ function setup() {
 
   //handler on what to do when a card update is sent
   Client.socket.on('cardUpdate', function(data) {
+    console.log("receieved card update");
     game.cards[data.index].col = data.col;
     game.cards[data.index].textCol = data.textCol;
     game.cards[data.index].isFlipped = data.isFlipped;
+
+    //update the score counter based on the card update
+    if (game.cards[data.index].isBlue) {
+      var scoreText = document.getElementById("blueScore");
+      var currentScore = scoreText.innerHTML;
+
+      currentScore = parseInt(currentScore);
+
+      scoreText.innerHTML = (currentScore - 1);
+    }
+    else if (game.cards[data.index].isRed) {
+      var scoreText = document.getElementById("redScore");
+      var currentScore = scoreText.innerHTML;
+
+      currentScore = parseInt(currentScore);
+
+      scoreText.innerHTML = (currentScore - 1);
+    }
   });
 }
 
@@ -226,7 +275,7 @@ function draw() {
     fill(255, 255, 255);
     textSize(40);
     textAlign(CENTER);
-    text("Waiting for players to ready up...", 150, 200, 500, 100);
+    text("Waiting for Players...", 150, 200, 500, 100);
   }
 
   //if in game mode, show the game

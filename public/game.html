@@ -79,7 +79,19 @@
       }
     
       .topSketch {
-        padding-left: 500px;
+        display: none;
+      }
+      
+      .topSketch h2{
+        display: inline-block;
+      }
+
+      #blueScore {
+        color: #237fe0;
+      }
+
+      #redScore {
+        color: #FF4447;
       }
 
       .bottomSketch {
@@ -192,6 +204,9 @@
     </div>
     <div id="sketchContainer" class="sketchContainer" align="center">
       <div id="topSketch" class="topSketch" align="center">
+        <h2 id="blueScore">8</h2>
+        <h2 id="dash">-</h2>
+        <h2 id="redScore">7</h2>
       </div>
       <div id="sketch-holder" class="block" align="center">
         <!-- sketch will go here -->

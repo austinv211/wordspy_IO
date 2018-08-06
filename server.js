@@ -98,11 +98,18 @@ function createCardsServer() {
     //create an array to store cards
     var numberOfCards = 25;
     var cards = [];
+
+    //create an array to store the possible noun indexes
+    var nounIndexes = Array.from(Array(nouns.length).keys());
+    nounIndexes = shuffle(nounIndexes);
+
+    //counter to count card index
+    var cardIndex = 0;
   
     //create the number of cards and space them accordingly
     for (var i = 0; i < 5; i++) {
       for (var j = 0; j < 5; j++) {
-        var c = new CardServer(j * 150 + 45, 108 * i + 8,nouns[Math.floor(Math.random() * nouns.length - 1)] , false, false, false, false, [255, 100], [0, 0, 0], false);
+        var c = new CardServer(j * 150 + 45, 108 * i + 8,nouns[nounIndexes[cardIndex++]] , false, false, false, false, [255, 100], [0, 0, 0], false);
         cards.push(c);
       }
     }
